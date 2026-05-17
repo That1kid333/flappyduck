@@ -17,4 +17,7 @@ const firebaseConfig = {
 const app        = initializeApp(firebaseConfig);
 export const auth      = getAuth(app);
 export const db        = getFirestore(app);
-export const analytics = getAnalytics(app);
+
+// Analytics is optional — can throw in private browsing / some mobile browsers
+export let analytics = null;
+try { analytics = getAnalytics(app); } catch { /* not critical */ }

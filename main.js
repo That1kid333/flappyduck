@@ -1,4 +1,4 @@
-import { watchAuthState, signUpWithEmail, signInWithEmail, signInWithGoogle, signOut } from './auth.js';
+import { watchAuthState, signUpWithEmail, signInWithEmail, signInWithGoogle, signOut, handleGoogleRedirect } from './auth.js';
 import { submitScore, fetchGlobalLeaderboard, fetchPersonalScores, isGlobalLeaderboardScore } from './db.js';
 
 // --- DOM Elements ---
@@ -175,12 +175,20 @@ loginSubmitBtn.addEventListener('click', async () => {
   }
 });
 
-googleSignupBtn.addEventListener('click', async () => {
-  try { await signInWithGoogle(); closeAuthModal(); } catch { /* popup closed */ }
-});
-googleLoginBtn.addEventListener('click', async () => {
-  try { await signInWithGoogle(); closeAuthModal(); } catch { /* popup closed */ }
-});
+async function doGoogleSignIn(errorEl) {
+  errorEl.style.display = 'none';
+  try {
+    const user = await signInWithGoogle();
+    if (user) closeAuthModal(); // null = redirect in progress, modal stays hidden by redirect
+  } catch (err) {
+    console.error('[Auth] Google sign-in error:', err);
+    errorEl.textContent = friendlyAuthError(err.code);
+    errorEl.style.display = '';
+  }
+}
+
+googleSignupBtn.addEventListener('click', () => doGoogleSignIn(signupError));
+googleLoginBtn.addEventListener('click',  () => doGoogleSignIn(loginError));
 
 if (guestSignupBtn) guestSignupBtn.addEventListener('click', () => openAuthModal('signup'));
 if (lbSigninBtn)    lbSigninBtn.addEventListener('click', () => openAuthModal('login'));
@@ -647,5 +655,8 @@ window.addEventListener('keydown', e => {
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
+// Handle Google redirect result (mobile sign-in returns here after redirect)
+handleGoogleRedirect().then(user => { if (user) closeAuthModal(); });
+
 showMenu();
 loop();
