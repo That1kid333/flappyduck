@@ -17,10 +17,26 @@
       <!-- ── UI Layer ─────────────────────────────────────── -->
       <div id="ui-layer">
 
-        <!-- User pill (always visible over game) -->
+        <!-- Top bar: user pill + sound toggle -->
         <div id="user-pill">
           <span id="user-pill-name">👤 Guest</span>
           <button id="user-pill-btn" class="pill-btn">Sign In</button>
+        </div>
+        <button id="sound-btn" class="sound-btn" title="Toggle sound">🔊</button>
+
+        <!-- Achievement toast (appears over everything) -->
+        <div id="achievement-toast" class="achievement-toast" style="display:none;">
+          <span id="achievement-toast-emoji">🏆</span>
+          <div class="achievement-toast-info">
+            <p class="achievement-unlocked-label">ACHIEVEMENT UNLOCKED!</p>
+            <p id="achievement-toast-name">Duck Master</p>
+          </div>
+        </div>
+
+        <!-- "You've been beaten" banner -->
+        <div id="beaten-banner" class="beaten-banner" style="display:none;">
+          <span>😱 You've been knocked off the top 10!</span>
+          <button id="beaten-close" class="beaten-close">✕</button>
         </div>
 
         <!-- ── Start Menu ────────────────────────────────── -->
@@ -40,10 +56,23 @@
               </div>
             </div>
           </div>
-          <button id="start-btn" class="btn">PLAY</button>
+
+          <!-- Difficulty selector -->
+          <div class="difficulty-row">
+            <span class="diff-label">DIFFICULTY</span>
+            <div class="diff-btns">
+              <button class="diff-btn" data-diff="easy">EASY</button>
+              <button class="diff-btn active" data-diff="normal">NORMAL</button>
+              <button class="diff-btn" data-diff="hard">HARD</button>
+            </div>
+          </div>
+
+          <button id="start-btn" class="btn">▶ PLAY</button>
+          <button id="daily-btn" class="btn btn-daily">📅 DAILY CHALLENGE</button>
           <button id="start-leaderboard-btn" class="btn btn-secondary">🏆 HIGH SCORES</button>
+
           <div class="auth-nudge" id="start-auth-nudge">
-            <span id="start-auth-text">Sign in to save your scores globally!</span>
+            <span id="start-auth-text">Sign in to save scores globally!</span>
             <button id="start-auth-link" class="link-btn">Sign Up Free</button>
           </div>
         </div>
@@ -51,6 +80,8 @@
         <!-- ── In Game ───────────────────────────────────── -->
         <div id="in-game-ui" class="screen">
           <div id="score-display">0</div>
+          <div id="daily-badge" class="daily-badge" style="display:none;">📅 DAILY</div>
+          <div id="difficulty-badge" class="difficulty-badge"></div>
         </div>
 
         <!-- ── Game Over ─────────────────────────────────── -->
@@ -58,16 +89,16 @@
           <h2>Game Over</h2>
           <div class="score-board">
             <p>Score: <span id="final-score">0</span></p>
-            <p>Best: <span id="best-score">0</span></p>
+            <p>Best:  <span id="best-score">0</span></p>
           </div>
-          <!-- Shown only for guests with a good score -->
           <div id="guest-save-cta" class="guest-cta" style="display:none;">
-            <p class="guest-cta-text">🔥 Sign up to save your score to the global leaderboard!</p>
+            <p class="guest-cta-text">🔥 Sign up to save your score globally!</p>
             <button id="guest-signup-btn" class="btn btn-glow">CREATE FREE ACCOUNT</button>
           </div>
-          <button id="restart-btn" class="btn">RESTART</button>
-          <button id="leaderboard-btn" class="btn btn-secondary">🏆 HIGH SCORES</button>
-          <button id="menu-btn" class="btn btn-secondary">MENU</button>
+          <button id="share-btn"     class="btn btn-share">📤 SHARE SCORE</button>
+          <button id="restart-btn"   class="btn">RESTART</button>
+          <button id="leaderboard-btn"  class="btn btn-secondary">🏆 HIGH SCORES</button>
+          <button id="menu-btn"      class="btn btn-secondary">MENU</button>
         </div>
 
         <!-- ── Initials Entry ────────────────────────────── -->
@@ -76,6 +107,9 @@
             <h2 class="initials-title">NEW HIGH SCORE!</h2>
             <p class="initials-subtitle">ENTER YOUR INITIALS</p>
             <div class="initials-score-display">SCORE: <span id="initials-score-val">0</span></div>
+            <button id="use-saved-initials-btn" class="btn btn-quick-initials" style="display:none;">
+              ⚡ USE <span id="saved-initials-preview">AAA</span>
+            </button>
             <div class="initials-slots">
               <div class="initial-slot-wrapper">
                 <button class="initial-arrow arrow-up" data-slot="0">&#9650;</button>
@@ -101,20 +135,17 @@
         <div id="leaderboard-screen" class="screen">
           <h2 class="leaderboard-title">🏆 HIGH SCORES</h2>
           <div class="lb-tabs">
-            <button class="lb-tab active" id="tab-global" data-tab="global">GLOBAL</button>
-            <button class="lb-tab" id="tab-personal" data-tab="personal">MY SCORES</button>
+            <button class="lb-tab active" id="tab-global"   data-tab="global">GLOBAL</button>
+            <button class="lb-tab"        id="tab-weekly"   data-tab="weekly">WEEKLY</button>
+            <button class="lb-tab"        id="tab-daily"    data-tab="daily">DAILY</button>
+            <button class="lb-tab"        id="tab-personal" data-tab="personal">MINE</button>
           </div>
           <div class="leaderboard-table-wrapper">
             <table class="leaderboard-table">
               <thead>
-                <tr>
-                  <th>#</th>
-                  <th>NAME</th>
-                  <th>SCORE</th>
-                </tr>
+                <tr><th>#</th><th>NAME</th><th>SCORE</th></tr>
               </thead>
-              <tbody id="leaderboard-body">
-              </tbody>
+              <tbody id="leaderboard-body"></tbody>
             </table>
           </div>
           <p id="lb-loading" class="lb-loading" style="display:none;">Loading...</p>
@@ -132,11 +163,9 @@
     <div id="auth-overlay" class="auth-overlay" style="display:none;">
       <div class="auth-modal">
         <button id="auth-close-btn" class="auth-close">✕</button>
-
-        <!-- Tabs -->
         <div class="auth-tabs">
           <button class="auth-tab active" data-auth-tab="signup">Sign Up</button>
-          <button class="auth-tab" data-auth-tab="login">Log In</button>
+          <button class="auth-tab"        data-auth-tab="login">Log In</button>
         </div>
 
         <!-- Sign Up panel -->
@@ -163,10 +192,10 @@
           </button>
           <p class="auth-perks-title">✨ Free account benefits:</p>
           <ul class="auth-perks">
-            <li>🌍 Global leaderboard scores</li>
+            <li>🌍 Global &amp; weekly leaderboards</li>
             <li>📊 Personal score history</li>
             <li>🦆 Profile &amp; stats</li>
-            <li>🚫 Ad-free experience</li>
+            <li>📅 Daily challenge</li>
           </ul>
         </div>
 
@@ -189,6 +218,63 @@
             Continue with Google
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- ── Profile Modal ──────────────────────────────────────────── -->
+    <div id="profile-overlay" class="auth-overlay" style="display:none;">
+      <div class="auth-modal profile-modal">
+        <button id="profile-close-btn" class="auth-close">✕</button>
+        <div class="profile-header">
+          <img id="profile-duck-img" src="/mallard_duck.png" alt="Duck" class="profile-duck-avatar">
+          <div class="profile-header-info">
+            <p id="profile-display-name" class="profile-name">—</p>
+            <p id="profile-email" class="profile-email-text">—</p>
+          </div>
+        </div>
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <span class="stat-value" id="profile-best-score">—</span>
+            <span class="stat-label">BEST</span>
+          </div>
+          <div class="profile-stat-divider"></div>
+          <div class="profile-stat">
+            <span class="stat-value" id="profile-games-played">—</span>
+            <span class="stat-label">GAMES</span>
+          </div>
+        </div>
+        <div class="profile-divider"></div>
+        <div class="profile-section">
+          <p class="profile-section-label">PREFERRED INITIALS</p>
+          <p class="profile-section-hint">Auto-filled on your next high score</p>
+          <div class="profile-initials-row">
+            <input type="text" id="profile-initials-input" maxlength="3"
+                   placeholder="AAA" class="profile-initials-input"
+                   autocomplete="off" spellcheck="false">
+            <button id="profile-initials-save-btn" class="btn btn-secondary profile-save-btn">SAVE</button>
+          </div>
+          <p id="profile-initials-msg" class="profile-msg" style="display:none;"></p>
+        </div>
+        <div class="profile-section">
+          <p class="profile-section-label">DISPLAY NAME</p>
+          <div class="profile-initials-row">
+            <input type="text" id="profile-name-input" maxlength="20"
+                   placeholder="DuckMaster" class="profile-name-input"
+                   autocomplete="off">
+            <button id="profile-name-save-btn" class="btn btn-secondary profile-save-btn">SAVE</button>
+          </div>
+          <p id="profile-name-msg" class="profile-msg" style="display:none;"></p>
+        </div>
+        <div class="profile-divider"></div>
+
+        <!-- Achievements section -->
+        <div class="profile-section">
+          <p class="profile-section-label">ACHIEVEMENTS</p>
+          <div id="profile-achievements" class="profile-achievements"></div>
+        </div>
+        <div class="profile-divider"></div>
+
+        <button id="profile-signout-btn" class="btn btn-secondary" style="width:100%;margin:0;">SIGN OUT</button>
       </div>
     </div>
 
