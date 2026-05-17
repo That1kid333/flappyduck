@@ -91,8 +91,8 @@ const background = {
 const duck = {
   x: 50,
   y: 150,
-  width: 40,
-  height: 40,
+  width: 55,
+  height: 55,
   gravity: 0.25,
   velocity: 0,
   jump: -5.5,
@@ -147,8 +147,8 @@ const duck = {
 
 const trees = {
   items: [],
-  width: 60,
-  gap: 130, // Adjusted gap to be tighter, fitting the duck appropriately
+  width: 80,
+  gap: 160, // Adjusted gap to be proportional
   dx: 2.5,  // Speed
   
   draw: function() {
@@ -217,12 +217,12 @@ const trees = {
       p.x -= this.dx;
       
       // Collision detection (AABB approximation)
-      // Duck hitbox
+      // Duck hitbox (added more padding since duck is larger)
       const duckHitbox = {
-        left: duck.x + 5,
-        right: duck.x + duck.width - 5,
-        top: duck.y + 5,
-        bottom: duck.y + duck.height - 5
+        left: duck.x + 10,
+        right: duck.x + duck.width - 10,
+        top: duck.y + 10,
+        bottom: duck.y + duck.height - 10
       };
 
       // Top pipe hitbox
