@@ -50,7 +50,54 @@
             <p>Best: <span id="best-score">0</span></p>
           </div>
           <button id="restart-btn" class="btn">RESTART</button>
-          <button id="menu-btn" class="btn">MENU</button>
+          <button id="leaderboard-btn" class="btn btn-secondary">HIGH SCORES</button>
+          <button id="menu-btn" class="btn btn-secondary">MENU</button>
+        </div>
+
+        <!-- Initials Entry Screen -->
+        <div id="initials-screen" class="screen">
+          <div class="initials-container">
+            <h2 class="initials-title">NEW HIGH SCORE!</h2>
+            <p class="initials-subtitle">ENTER YOUR INITIALS</p>
+            <div class="initials-score-display">SCORE: <span id="initials-score-val">0</span></div>
+            <div class="initials-slots">
+              <div class="initial-slot-wrapper">
+                <button class="initial-arrow arrow-up" data-slot="0">&#9650;</button>
+                <div class="initial-slot" id="slot-0">A</div>
+                <button class="initial-arrow arrow-down" data-slot="0">&#9660;</button>
+              </div>
+              <div class="initial-slot-wrapper">
+                <button class="initial-arrow arrow-up" data-slot="1">&#9650;</button>
+                <div class="initial-slot" id="slot-1">A</div>
+                <button class="initial-arrow arrow-down" data-slot="1">&#9660;</button>
+              </div>
+              <div class="initial-slot-wrapper">
+                <button class="initial-arrow arrow-up" data-slot="2">&#9650;</button>
+                <div class="initial-slot" id="slot-2">A</div>
+                <button class="initial-arrow arrow-down" data-slot="2">&#9660;</button>
+              </div>
+            </div>
+            <button id="submit-initials-btn" class="btn">SUBMIT</button>
+          </div>
+        </div>
+
+        <!-- Leaderboard Screen -->
+        <div id="leaderboard-screen" class="screen">
+          <h2 class="leaderboard-title">&#x1F3C6; HIGH SCORES</h2>
+          <div class="leaderboard-table-wrapper">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>NAME</th>
+                  <th>SCORE</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-body">
+              </tbody>
+            </table>
+          </div>
+          <button id="close-leaderboard-btn" class="btn">BACK</button>
         </div>
 
       </div>
