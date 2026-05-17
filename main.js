@@ -91,11 +91,11 @@ const background = {
 const duck = {
   x: 50,
   y: 150,
-  width: 55,
-  height: 55,
-  gravity: 0.25,
+  width: 75,
+  height: 75,
+  gravity: 0.4,
   velocity: 0,
-  jump: -5.5,
+  jump: -7.5,
   radius: 15,
   
   draw: function() {
@@ -147,9 +147,9 @@ const duck = {
 
 const trees = {
   items: [],
-  width: 80,
-  gap: 160, // Adjusted gap to be proportional
-  dx: 2.5,  // Speed
+  width: 130,
+  gap: 220, // Increased gap for larger duck
+  dx: 3.5,  // Increased speed to match new gravity/scale
   
   draw: function() {
     const img = images.tree;
@@ -217,21 +217,24 @@ const trees = {
       p.x -= this.dx;
       
       // Collision detection (AABB approximation)
-      // Duck hitbox (added more padding since duck is larger)
+      // Duck hitbox (huge padding to account for transparent sprite background)
       const duckHitbox = {
-        left: duck.x + 10,
-        right: duck.x + duck.width - 10,
-        top: duck.y + 10,
-        bottom: duck.y + duck.height - 10
+        left: duck.x + 20,
+        right: duck.x + duck.width - 20,
+        top: duck.y + 20,
+        bottom: duck.y + duck.height - 20
       };
 
+      // Tree padding (to ignore the transparent background around the tree sprite)
+      const treePadding = 30;
+
       // Top pipe hitbox
-      if (duckHitbox.right > p.x && duckHitbox.left < p.x + this.width && duckHitbox.top < p.y + p.topHeight) {
+      if (duckHitbox.right > p.x + treePadding && duckHitbox.left < p.x + this.width - treePadding && duckHitbox.top < p.y + p.topHeight) {
         setGameOver();
       }
       
       // Bottom pipe hitbox
-      if (duckHitbox.right > p.x && duckHitbox.left < p.x + this.width && duckHitbox.bottom > canvas.height - p.bottomHeight) {
+      if (duckHitbox.right > p.x + treePadding && duckHitbox.left < p.x + this.width - treePadding && duckHitbox.bottom > canvas.height - p.bottomHeight) {
         setGameOver();
       }
       
