@@ -107,6 +107,7 @@ let frames               = 0;
 let activeLeaderboardTab = 'global';
 let isDailyChallenge     = false;
 let difficulty           = localStorage.getItem('flappyDuckDifficulty') || 'normal';
+let cachedBestScore      = 0;  // best score for logged-in user, fetched from Firestore
 
 // Difficulty presets: { gap, dx }
 const DIFF = {
@@ -318,8 +319,11 @@ watchAuthState(async user => {
         localStorage.setItem(INITIALS_KEY, profile.preferredInitials);
         refreshUseSavedBtn();
       }
+      if (profile?.bestScore) cachedBestScore = profile.bestScore;
     } catch { /* non-critical */ }
     flushPendingScores();
+  } else if (!user) {
+    cachedBestScore = 0;
   }
 });
 
@@ -361,8 +365,6 @@ function applyDifficulty(diff) {
 diffBtns.forEach(b => {
   b.addEventListener('click', () => { applyDifficulty(b.dataset.diff); playClick(); });
 });
-
-applyDifficulty(difficulty);
 
 // ── Auth Modal ────────────────────────────────────────────────────────────────
 function openAuthModal(tab = 'signup') {
@@ -548,7 +550,8 @@ function isLocalLeaderboardScore(s) {
 }
 
 function getBestScore() {
-  return localLeaderboard.length > 0 ? localLeaderboard[0].score : 0;
+  const local = localLeaderboard.length > 0 ? localLeaderboard[0].score : 0;
+  return Math.max(local, cachedBestScore);
 }
 
 function saveLocalEntry(initials, s) {
@@ -621,6 +624,7 @@ async function submitInitials() {
   if (currentUser && navigator.onLine) {
     try {
       await submitScore(scoreData);
+      cachedBestScore = Math.max(cachedBestScore, pendingScore);
       // Flag if they made top 10
       const board = await fetchGlobalLeaderboard(10);
       if (board.some(e => e.uid === currentUser.uid)) {
@@ -885,8 +889,11 @@ async function setGameOver() {
   }
 
   if (qualifies) {
+    pendingScore = score;  // capture immediately — score resets if user navigates away
+    cachedBestScore = Math.max(cachedBestScore, score);
+    const frozenScore = score;
     setTimeout(() => {
-      pendingScore = score;
+      if (gameState !== 'GAMEOVER') return;  // user navigated away, skip initials
       activeSlot   = 0;
       const saved  = getSavedInitials();
       if (saved) {
@@ -896,7 +903,7 @@ async function setGameOver() {
       }
       updateSlotDisplay();
       refreshUseSavedBtn();
-      initialsScoreVal.innerText = score;
+      initialsScoreVal.innerText = frozenScore;
       hideAll();
       gameState = 'INITIALS';
       initialsScreen.classList.add('active');
@@ -1039,6 +1046,7 @@ window.addEventListener('keydown', e => {
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
+applyDifficulty(difficulty);   // highlight saved difficulty btn + sync trees values
 refreshUseSavedBtn();
 handleGoogleRedirect().then(user => { if (user) closeAuthModal(); });
 showMenu();
