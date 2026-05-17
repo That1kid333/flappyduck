@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['mallard_duck.png', 'white_duck.png', 'rubber_duck.png', 'tree_obstacle.png', 'lake_background.png'],
+      includeAssets: ['app_icon.png', 'mallard_duck.png', 'white_duck.png', 'rubber_duck.png', 'tree_obstacle.png', 'lake_background.png'],
       manifest: {
         name: 'Flappy Duck',
         short_name: 'FlappyDuck',
@@ -16,12 +16,12 @@ export default defineConfig({
         orientation: 'portrait',
         icons: [
           {
-            src: 'mallard_duck.png',
+            src: 'app_icon.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'mallard_duck.png',
+            src: 'app_icon.png',
             sizes: '512x512',
             type: 'image/png'
           }
