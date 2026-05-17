@@ -13,11 +13,17 @@
   <body>
     <div id="game-container">
       <canvas id="gameCanvas"></canvas>
-      
-      <!-- UI Layer -->
+
+      <!-- ── UI Layer ─────────────────────────────────────── -->
       <div id="ui-layer">
-        
-        <!-- Start Menu -->
+
+        <!-- User pill (always visible over game) -->
+        <div id="user-pill">
+          <span id="user-pill-name">👤 Guest</span>
+          <button id="user-pill-btn" class="pill-btn">Sign In</button>
+        </div>
+
+        <!-- ── Start Menu ────────────────────────────────── -->
         <div id="start-menu" class="screen active">
           <h1>Flappy Duck</h1>
           <div class="character-selection">
@@ -35,26 +41,36 @@
             </div>
           </div>
           <button id="start-btn" class="btn">PLAY</button>
+          <button id="start-leaderboard-btn" class="btn btn-secondary">🏆 HIGH SCORES</button>
+          <div class="auth-nudge" id="start-auth-nudge">
+            <span id="start-auth-text">Sign in to save your scores globally!</span>
+            <button id="start-auth-link" class="link-btn">Sign Up Free</button>
+          </div>
         </div>
 
-        <!-- In Game -->
+        <!-- ── In Game ───────────────────────────────────── -->
         <div id="in-game-ui" class="screen">
           <div id="score-display">0</div>
         </div>
 
-        <!-- Game Over -->
+        <!-- ── Game Over ─────────────────────────────────── -->
         <div id="game-over-menu" class="screen">
           <h2>Game Over</h2>
           <div class="score-board">
             <p>Score: <span id="final-score">0</span></p>
             <p>Best: <span id="best-score">0</span></p>
           </div>
+          <!-- Shown only for guests with a good score -->
+          <div id="guest-save-cta" class="guest-cta" style="display:none;">
+            <p class="guest-cta-text">🔥 Sign up to save your score to the global leaderboard!</p>
+            <button id="guest-signup-btn" class="btn btn-glow">CREATE FREE ACCOUNT</button>
+          </div>
           <button id="restart-btn" class="btn">RESTART</button>
-          <button id="leaderboard-btn" class="btn btn-secondary">HIGH SCORES</button>
+          <button id="leaderboard-btn" class="btn btn-secondary">🏆 HIGH SCORES</button>
           <button id="menu-btn" class="btn btn-secondary">MENU</button>
         </div>
 
-        <!-- Initials Entry Screen -->
+        <!-- ── Initials Entry ────────────────────────────── -->
         <div id="initials-screen" class="screen">
           <div class="initials-container">
             <h2 class="initials-title">NEW HIGH SCORE!</h2>
@@ -81,9 +97,13 @@
           </div>
         </div>
 
-        <!-- Leaderboard Screen -->
+        <!-- ── Leaderboard ───────────────────────────────── -->
         <div id="leaderboard-screen" class="screen">
-          <h2 class="leaderboard-title">&#x1F3C6; HIGH SCORES</h2>
+          <h2 class="leaderboard-title">🏆 HIGH SCORES</h2>
+          <div class="lb-tabs">
+            <button class="lb-tab active" id="tab-global" data-tab="global">GLOBAL</button>
+            <button class="lb-tab" id="tab-personal" data-tab="personal">MY SCORES</button>
+          </div>
           <div class="leaderboard-table-wrapper">
             <table class="leaderboard-table">
               <thead>
@@ -97,11 +117,81 @@
               </tbody>
             </table>
           </div>
-          <button id="close-leaderboard-btn" class="btn">BACK</button>
+          <p id="lb-loading" class="lb-loading" style="display:none;">Loading...</p>
+          <div id="lb-personal-locked" class="lb-locked" style="display:none;">
+            <p>Sign in to track your personal scores!</p>
+            <button id="lb-signin-btn" class="btn btn-glow">SIGN IN / SIGN UP</button>
+          </div>
+          <button id="close-leaderboard-btn" class="btn btn-secondary">BACK</button>
         </div>
 
+      </div><!-- /ui-layer -->
+    </div><!-- /game-container -->
+
+    <!-- ── Auth Modal ──────────────────────────────────────────── -->
+    <div id="auth-overlay" class="auth-overlay" style="display:none;">
+      <div class="auth-modal">
+        <button id="auth-close-btn" class="auth-close">✕</button>
+
+        <!-- Tabs -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-auth-tab="signup">Sign Up</button>
+          <button class="auth-tab" data-auth-tab="login">Log In</button>
+        </div>
+
+        <!-- Sign Up panel -->
+        <div id="auth-panel-signup" class="auth-panel active">
+          <p class="auth-subtitle">Join free. Save your scores. Climb the board.</p>
+          <div class="auth-field">
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="auth-field">
+            <label for="signup-name">Display Name <span class="auth-optional">(optional)</span></label>
+            <input type="text" id="signup-name" placeholder="DuckMaster" autocomplete="username" maxlength="20">
+          </div>
+          <div class="auth-field">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" placeholder="6+ characters" autocomplete="new-password">
+          </div>
+          <p id="signup-error" class="auth-error" style="display:none;"></p>
+          <button id="signup-submit-btn" class="btn auth-submit-btn">CREATE ACCOUNT</button>
+          <div class="auth-divider"><span>or</span></div>
+          <button id="google-signup-btn" class="btn btn-google">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+            Continue with Google
+          </button>
+          <p class="auth-perks-title">✨ Free account benefits:</p>
+          <ul class="auth-perks">
+            <li>🌍 Global leaderboard scores</li>
+            <li>📊 Personal score history</li>
+            <li>🦆 Profile &amp; stats</li>
+            <li>🚫 Ad-free experience</li>
+          </ul>
+        </div>
+
+        <!-- Log In panel -->
+        <div id="auth-panel-login" class="auth-panel">
+          <p class="auth-subtitle">Welcome back, Duck Commander.</p>
+          <div class="auth-field">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="auth-field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+          </div>
+          <p id="login-error" class="auth-error" style="display:none;"></p>
+          <button id="login-submit-btn" class="btn auth-submit-btn">LOG IN</button>
+          <div class="auth-divider"><span>or</span></div>
+          <button id="google-login-btn" class="btn btn-google">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+            Continue with Google
+          </button>
+        </div>
       </div>
     </div>
+
     <script type="module" src="/main.js"></script>
   </body>
 </html>
