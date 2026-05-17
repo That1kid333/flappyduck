@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Flappy Duck</title>
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="game-container">
+      <canvas id="gameCanvas"></canvas>
+      
+      <!-- UI Layer -->
+      <div id="ui-layer">
+        
+        <!-- Start Menu -->
+        <div id="start-menu" class="screen active">
+          <h1>Flappy Duck</h1>
+          <div class="character-selection">
+            <p>Select your duck:</p>
+            <div class="duck-options">
+              <div class="duck-option selected" data-duck="mallard_duck.png">
+                <img src="/mallard_duck.png" alt="Mallard">
+              </div>
+              <div class="duck-option" data-duck="white_duck.png">
+                <img src="/white_duck.png" alt="White Duck">
+              </div>
+              <div class="duck-option" data-duck="rubber_duck.png">
+                <img src="/rubber_duck.png" alt="Rubber Duck">
+              </div>
+            </div>
+          </div>
+          <button id="start-btn" class="btn">PLAY</button>
+        </div>
+
+        <!-- In Game -->
+        <div id="in-game-ui" class="screen">
+          <div id="score-display">0</div>
+        </div>
+
+        <!-- Game Over -->
+        <div id="game-over-menu" class="screen">
+          <h2>Game Over</h2>
+          <div class="score-board">
+            <p>Score: <span id="final-score">0</span></p>
+            <p>Best: <span id="best-score">0</span></p>
+          </div>
+          <button id="restart-btn" class="btn">RESTART</button>
+          <button id="menu-btn" class="btn">MENU</button>
+        </div>
+
+      </div>
+    </div>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
