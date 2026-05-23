@@ -41,28 +41,36 @@ export async function signInWithEmail(email, password) {
 }
 
 // ── Google Sign-In ───────────────────────────────────────────────
-// Uses redirect on mobile (popups are blocked), popup on desktop.
+// Always tries popup first (works on mobile browsers when triggered by user tap).
+// Falls back to redirect only if the popup is actually blocked by the browser.
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
-  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
-  if (isMobile) {
-    // Redirect flow — page reloads, result handled by handleGoogleRedirect()
-    await signInWithRedirect(auth, provider);
-    return null;
+  try {
+    const cred = await signInWithPopup(auth, provider);
+    // ensureProfile is non-fatal — user is authenticated even if Firestore write fails
+    ensureProfile(cred.user).catch(err => console.warn('[Auth] ensureProfile failed:', err));
+    return cred.user;
+  } catch (err) {
+    if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+      // User closed the popup — not an error, just return null
+      return null;
+    }
+    if (err.code === 'auth/popup-blocked') {
+      // Popup was blocked by the browser — fall back to redirect
+      await signInWithRedirect(auth, provider);
+      return null;  // page will redirect; result captured in handleGoogleRedirect()
+    }
+    throw err;
   }
-
-  const cred = await signInWithPopup(auth, provider);
-  await ensureProfile(cred.user);
-  return cred.user;
 }
 
-// Call once on page load to capture the result after a Google redirect
+// Call once on page load to capture the result after a Google redirect fallback
 export async function handleGoogleRedirect() {
   try {
     const result = await getRedirectResult(auth);
     if (result?.user) {
-      await ensureProfile(result.user);
+      ensureProfile(result.user).catch(err => console.warn('[Auth] ensureProfile failed:', err));
       return result.user;
     }
   } catch (err) {
@@ -75,8 +83,8 @@ async function ensureProfile(user) {
   const existing = await getUserProfile(user.uid);
   if (!existing) {
     await createUserProfile(user.uid, {
-      email: user.email,
-      displayName: user.displayName || user.email.split('@')[0],
+      email:       user.email,
+      displayName: user.displayName || user.email?.split('@')[0] || 'Duck',
     });
   }
 }

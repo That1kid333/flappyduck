@@ -443,13 +443,17 @@ if (lbSigninBtn)    lbSigninBtn.addEventListener('click', () => openAuthModal('l
 
 function friendlyAuthError(code) {
   const map = {
-    'auth/email-already-in-use': 'That email is already taken.',
-    'auth/invalid-email':        'Invalid email address.',
-    'auth/weak-password':        'Password must be at least 6 characters.',
-    'auth/user-not-found':       'No account with that email.',
-    'auth/wrong-password':       'Incorrect password.',
-    'auth/invalid-credential':   'Email or password is incorrect.',
-    'auth/too-many-requests':    'Too many attempts. Try again later.',
+    'auth/email-already-in-use':                  'That email is already taken.',
+    'auth/invalid-email':                          'Invalid email address.',
+    'auth/weak-password':                          'Password must be at least 6 characters.',
+    'auth/user-not-found':                         'No account with that email.',
+    'auth/wrong-password':                         'Incorrect password.',
+    'auth/invalid-credential':                     'Email or password is incorrect.',
+    'auth/too-many-requests':                      'Too many attempts. Try again later.',
+    'auth/unauthorized-domain':                    'This domain is not authorized. Contact support.',
+    'auth/operation-not-allowed':                  'Google sign-in is not enabled. Contact support.',
+    'auth/account-exists-with-different-credential': 'An account already exists with this email. Try logging in with email/password.',
+    'auth/network-request-failed':                 'Network error. Check your connection and try again.',
   };
   return map[code] || 'Something went wrong. Please try again.';
 }
